@@ -567,9 +567,6 @@ class Polyomino(object):
         else:
             return Polyomino(self.redpath[1:self.length-1], self.greenpath[1:self.length-1], self.labels, reduced=True)
 
-    def area_word(self):
-        return self.to_dyckpath().area_word()
-
     def area(self):
         # Computes the area.
         area = 0
@@ -826,24 +823,34 @@ class Polyomino(object):
 
 class Drawing(object):
 
-    def __init__(self, Cobject):
-        
-        self.paths = Cobject.paths()
-        self.labels = Cobject.labels
-        self.width = Cobject.getwidth()
-        self.height = Cobject.getheight()
+    def __init__(self, CObject):
+        # the CObject (= Combinatorial object) is either a Path or a Polyomino
+        self.paths = CObject.paths()
+        self.labelling = CObject.labels
+
+        self.width = CObject.getwidth()
+        self.height = CObject.getheight()
         self.to_center = [-.5*self.width, -.5*self.height,0]
 
         self.bounding_box = Rectangle(width = self.width + 2*BUFF, height= self.height + 2*BUFF).set_stroke(opacity = .5)
     
+    def is_polyomino(self):
+        # tests if the CObject is a polyomino
+        return len(self.paths[1]) > 0
+
+    def to_CObject(self):
+        if self.is_polyomino():
+            return Polyomino(self.paths[0], self.paths[1], self.labelling)
+        else:
+            return Path(self.paths[0], self.labelling)
 
     def grid(self):
         
         grid = []
         for i in range(self.width + 1):
-            grid += Line([i,0,0],[i,self.height,0])
+            grid += Line(array([i,0,0]),array([i,self.height,0]))
         for i in range(self.height + 1):
-            grid += Line([0,i,0], [self.width, i, 0])
+            grid += Line(array([0,i,0]), array([self.width, i, 0]))
         
         grid = VGroup(*grid)
 
@@ -886,4 +893,43 @@ class Drawing(object):
 
         return out
             
-        
+    def labels(self):
+        out = []
+        if self.is_polyomino():
+            for i in range(self.width):
+                for j in range(self.height):
+                    if self.labelling[i][j] != None:
+                        out += Tex(f"{self.labelling[i][j]}").shift((i + .5)*RIGHT + (j + .5)*UP)
+        else:
+            aw = self.to_CObject().area_word().word
+            for i in range(self.height):
+                out += Tex(f"{self.labelling[i]}").shift((i + .5)*UP + (i - aw[i] + .5)*RIGHT)
+
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.bounding_box)
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+
+    def circle_labels(self, labs, color = WHITE):
+        # for polyominoes: [i,j] in labs -> circle label in i-th col and j-th row
+        # for paths: i in labs -> circe label in i-th row
+        out = []
+        if self.is_polyomino():
+            for [i,j] in labs:
+                out += Circle(color = color, radius = .4).shift((i - .5)*RIGHT + (j - .5)*UP)
+        else:
+            aw = self.to_CObject().area_word().word
+            for i in labs:
+                out += Circle(color = color, radius = .4).shift((i - .5)*UP + (i - aw[i] - .5)*RIGHT)
+
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.bounding_box)
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+
