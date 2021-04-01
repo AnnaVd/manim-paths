@@ -914,7 +914,7 @@ class Drawing(object):
         return out
 
     def circle_labels(self, labs, color = WHITE):
-        # for polyominoes: [i,j] in labs -> circle label in i-th col and j-th row
+        # for polyominoes: [i,j] in labs -> circle label in i-th col and j-th row   
         # for paths: i in labs -> circe label in i-th row
         out = []
         if self.is_polyomino():
