@@ -5,8 +5,6 @@ from numpy import array, floor, gcd
 from manim import*
 from copy import deepcopy
 
-from pygments import highlight
-
 from permtools import *  # pylint: disable=unused-wildcard-import
 
 # custom colors
