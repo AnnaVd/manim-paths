@@ -5,6 +5,8 @@ from numpy import array, floor, gcd
 from manim import*
 from copy import deepcopy
 
+from pygments import highlight
+
 from permtools import *  # pylint: disable=unused-wildcard-import
 
 # custom colors
@@ -870,7 +872,6 @@ class Drawing(object):
                 newpoint = point + RIGHT
             else:
                 newpoint = point + UP
-            print("point", point, "newpoint", newpoint)
             path += Line(point, newpoint).set_stroke(color = MYPINK, width = 5)
             point = newpoint
         out = VGroup(*path)
@@ -914,11 +915,11 @@ class Drawing(object):
         return out
 
     def circle_labels(self, labs, color = WHITE):
-        # for polyominoes: [i,j] in labs -> circle label in i-th col and j-th row   
+        # for polyominoes: (i,j) in labs -> circle label in i-th col and j-th row   
         # for paths: i in labs -> circe label in i-th row
         out = []
         if self.is_polyomino():
-            for [i,j] in labs:
+            for (i,j) in labs:
                 out += Circle(color = color, radius = .4).shift((i - .5)*RIGHT + (j - .5)*UP)
         else:
             aw = self.to_CObject().area_word().word
@@ -931,5 +932,39 @@ class Drawing(object):
         bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
+        return out
+
+    def highlight_squares(self, squares, color = MYPINK):
+        # (i,j) in squares: i-th column, j-th row
+        out = []
+        for (i,j) in squares:
+            out += Square(side_length = 1, color = color).set_opacity(.3).set_stroke(width=0).shift((i-.5)*RIGHT + (j-.5)*UP)
+        
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.bounding_box)
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+
+    def highlight_diagonal(self, diag, color = MYPINK):
+        squares = []
+        if self.is_polyomino():
+            y = min(diag, self.height)
+            x = 1 + max(0, diag - y)
+            while True:
+                print("(x,y) = ", (x,y))
+                squares += [(x,y)]
+                x += 1
+                y -= 1
+                if x > self.width or y < 1:
+                    break
+        else:
+            for k in range(self.width - abs(diag)):
+                squares += [(-min(0,diag) + k + 1,max(diag,0) + k + 1)]
+
+        out = self.highlight_squares(squares, color = color)
+     
         return out
 
