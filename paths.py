@@ -7,15 +7,15 @@ from copy import deepcopy
 
 from permtools import *  # pylint: disable=unused-wildcard-import
 
+# ANIMATION CONFIGURATION
 # custom colors
 MYPINK = "#E20851" 
 MYGREEN = "#51e208"
-
 # Constants
 STEP = .8   # size of a step of a lattice path
-BUFF = .8   # fraction of step that is buffer for bounding box 
+BUFF = .2   # fraction of step that is buffer for bounding box 
 
-# path generators
+# GENERATORS
 
 def lattice_paths(m, n):
     # Returns all the lattice paths from (0,0) to (m,n), as generator.
@@ -51,8 +51,6 @@ def dyckpaths(n, k, level=0, started=False):
                         yield [1] + p
                 for p in dyckpaths(n-1, k, level=level-1, started=False):
                     yield [0] + p
-
-# path class generators
 
 def paths(n, m=0, dyck=False, labels=None, drises=0, dvalleys=0):
     # Draws all the Dyck paths, or Square paths ending East, of size n,
@@ -119,8 +117,6 @@ def polyominoes(m, n, labels=None, reduced=False):
     else:
         return [Polyomino(p.redpath, p.greenpath, labelling) for p in polyominoes for labelling in p.labellings(labels)]
 
-# labellings of composition mu
-
 def mu_labellings(blocks, labels, strict=True, reverse=False):
     if len(blocks) == 0:
         yield []
@@ -135,7 +131,7 @@ def mu_labellings(blocks, labels, strict=True, reverse=False):
             for xlabels in mu_labellings(blocks[1:], list((multiset(labels) - multiset(block))), strict=strict, reverse=reverse):
                 yield xlist + xlabels
 
-# classes
+# CLASSES
 
 class AreaWord(object):
     # Defines the AreaWord object.
@@ -181,24 +177,108 @@ class Path(object):
         self.valleys = valleys
 
         # It's the length of the path, which is half the number of steps.
-        self.length = self.getlength()
-        # Only used for LaTeX drawing.
-        self.stat_positions = [self.getlength(), -0.4]
-        # It's the area word of the path, as list (not as AreaWord instance).
+        self.size = self.get_size()
+        # The vector for shifting Mobjects to center
+        self.to_center = array([-0.5*self.size, -0.5*self.size,0])
+
         self.aword = self.area_word().word
         # It's the disance between the main diagonal and the base diagonal.
         self.shift = - min(self.aword)
 
-    def getlength(self):
+    # animation functions
+
+    def draw_bounding_box(self, opacity = 0):
+        return Rectangle(width = self.size + 2*BUFF, height= self.size + 2*BUFF).set_stroke(opacity = opacity)
+
+    def draw_grid(self):
+        grid = []
+        for i in range(self.size + 1):
+            grid += Line(array([i,0,0]),array([i,self.size,0]))
+            grid += Line(array([0,i,0]), array([self.size, i, 0]))
+        
+        grid = VGroup(*grid)
+
+        grid.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        grid = VGroup(grid, bb)
+        grid.scale(STEP)
+
+        return grid        
+
+    def draw_path(self):
+        path = []
+        point = ORIGIN
+        for i in self.path:
+            if i == 0:
+                newpoint = point + RIGHT
+            else:
+                newpoint = point + UP
+            path += Line(point, newpoint, color = MYPINK, width = 5)
+            point = newpoint
+        out = VGroup(*path)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+
+        return out
+
+    def draw_labels(self):
+        out = []
+        for i in range(self.size):
+                out += Tex(f"{self.labels[i]}").shift((i + .5)*UP + (i - self.aword[i] + .5)*RIGHT)
+
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+
+    def circle_labels(self, labs):
+        # i in labs -> circe label in i-th row
+        out = []
+        for i in labs:
+                out += Circle(color = WHITE, radius = .4).shift((i - .5)*UP + (i - self.aword[i] - .5)*RIGHT)
+
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+
+    def highlight_squares(self, squares):
+        # (i,j) in squares: i-th column, j-th row
+        out = []
+        for (i,j) in squares:
+            out += Square(side_length = 1, color = MYPINK).set_opacity(.3).set_stroke(width = 0).shift((i-.5)*RIGHT + (j-.5)*UP)
+        
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+
+    def highlight_diagonal(self, diag):
+        squares = []
+        for k in range(self.size - abs(diag)):
+            squares += [(-min(0,diag) + k + 1,max(diag,0) + k + 1)]
+
+        out = self.highlight_squares(squares)
+     
+        return out
+
+    # Math functions
+
+    def get_size(self):
         # Computes the length of the Dyck path.
         return int(len(self.path) / 2)
-
-    def getheight(self):
-        # Useful for LaTeX settings.
-        return self.length
-
-    def getwidth(self):
-        return self.getheight()
 
     def area_word(self):
         # Returns the area word of the path, as AreaWord.
@@ -223,32 +303,32 @@ class Path(object):
 
         # The deafult set of labels is [n].
         if composition is None:
-            composition = [0] + [1]*self.length
-        assert(self.length == sum(composition)), 'The number of labels does not match the size of the path.'
+            composition = [0] + [1]*self.size
+        assert(self.size == sum(composition)), 'The number of labels does not match the size of the path.'
 
         # Find the composition given by the vertical steps of the path.
-        peaks = sorted(set(multiset([sum(self.path[:i]) for i in range(2*self.length+1)])
-                           - multiset(range(1, self.length+1))))
+        peaks = sorted(set(multiset([sum(self.path[:i]) for i in range(2*self.size+1)])
+                           - multiset(range(1, self.size+1))))
         blocks = [peaks[i+1] - peaks[i] for i in range(len(peaks)-1)]
 
         # Define the set of labels.
         labels = [x for y in [[i]*composition[i] for i in range(len(composition))] for x in y]
         labellings = [labelling for labelling in mu_labellings(blocks, labels) if not (
             (self.aword[0] == 0 and labelling[0] == 0)
-            or (len([i for i in range(self.length) if self.aword[i] == -self.shift and labelling[i] > 0]) == 0)
+            or (len([i for i in range(self.size) if self.aword[i] == -self.shift and labelling[i] > 0]) == 0)
         )]
 
         return labellings
 
     def findrises(self):
         # Returns the indices of all the double rises of the path.
-        return [i for i in range(1, self.length) if self.aword[i] > self.aword[i-1]]
+        return [i for i in range(1, self.size) if self.aword[i] > self.aword[i-1]]
 
     def findvalleys(self, contractible=True):
         # Returns the indices of all the (contractible) valleys of the path.
         assert self.valleys == [], 'The path already has some decorated valleys.'
 
-        return [i for i in range(self.length)
+        return [i for i in range(self.size)
                 if (i == 0 and self.aword[i] < -1)
                 or (i == 0 and self.aword[i] == -1 and (self.labels is None or self.labels[i] > 0))
                 or (i > 0 and self.aword[i] < self.aword[i-1])
@@ -261,12 +341,12 @@ class Path(object):
         dinv = 0  # Initializes dinv to 0.
 
         # Goes through the letters of the area word.
-        for i in range(self.length):
+        for i in range(self.size):
             # Bonus dinv
             if self.aword[i] < 0 and (self.labels is None or self.labels[i] > 0):
                 dinv += 1
             if i not in self.valleys:  # Skip decorated valleys
-                for j in range(self.length)[i+1:]:  # Looks at the right.
+                for j in range(self.size)[i+1:]:  # Looks at the right.
                     if self.aword[j] == self.aword[i]-1:  # Secondary dinv
                         # Checks labels
                         if self.labels is None or self.labels[j] < self.labels[i]:
@@ -284,9 +364,9 @@ class Path(object):
         # Returns the area. Ignores rows with decorated rises.
 
         if self.rises is not []:
-            area = sum(self.aword[i] + self.shift for i in range(self.length) if i not in self.rises)
+            area = sum(self.aword[i] + self.shift for i in range(self.size) if i not in self.rises)
         else:
-            area = sum(self.aword[i] + self.shift for i in range(self.length))
+            area = sum(self.aword[i] + self.shift for i in range(self.size))
         return area
 
     def pmaj(self):
@@ -314,7 +394,7 @@ class Path(object):
                 if self.aword[j] == self.aword[i] and self.labels[j] < self.labels[i] and j not in self.valleys:
                     dinv += 1
         elif primary == 'right' and i not in self.valleys:
-            for j in range(self.length)[i+1:]:
+            for j in range(self.size)[i+1:]:
                 if self.aword[j] == self.aword[i] and self.labels[j] > self.labels[i] and (j not in self.valleys or ignore_valleys == False):
                     dinv += 1
 
@@ -323,7 +403,7 @@ class Path(object):
                 if self.aword[j] == self.aword[i]+1 and self.labels[j] > self.labels[i] and j not in self.valleys:
                     dinv += 1
         elif secondary == 'right' and i not in self.valleys:
-            for j in range(self.length)[i+1:]:
+            for j in range(self.size)[i+1:]:
                 if self.aword[j] == self.aword[i]-1 and self.labels[j] < self.labels[i] and (j not in self.valleys or ignore_valleys == False):
                     dinv += 1
 
@@ -343,7 +423,7 @@ class Path(object):
         else:
             diagonals = [[]]*(self.shift + max(self.aword) + 1)
 
-            for i in range(self.length):
+            for i in range(self.size):
                 diagonals[self.aword[i] + self.shift] = diagonals[self.aword[i] +
                                                                   self.shift] + [self.labels[i]]
 
@@ -353,7 +433,7 @@ class Path(object):
         # Returns the word obtained by sorting the diagonals in decreasing order, bottom to top.
 
         if self.labels is None:
-            return [x+1 for x in range(self.length)]
+            return [x+1 for x in range(self.size)]
         else:
             return [x for d in self.diagonals() for x in sorted(d)[::-1]]
 
@@ -365,7 +445,7 @@ class Path(object):
                 'We do not know how to compute the parking word for square paths.')
         else:
             if self.labels is None:
-                labels = [x+1 for x in range(self.length)]
+                labels = [x+1 for x in range(self.size)]
             else:
                 labels = self.labels
 
@@ -375,12 +455,12 @@ class Path(object):
             x = y = 0
             v = []
 
-            for i in range(2*self.length):
+            for i in range(2*self.size):
                 if self.path[i] == 1:
                     # If we read a vertical step, we add the corresponding label to the unused ones, then we increase y by one.
                     stack += {labels[y]}
                     y += 1
-                elif i < 2*self.length-1 and self.path[i] == 0 and self.path[i+1] == 1 and y in self.valleys:
+                elif i < 2*self.size-1 and self.path[i] == 0 and self.path[i+1] == 1 and y in self.valleys:
                     # If we read a decorated valley, we annotate when to read it.
                     v += [self.aword[y]]
                 else:
@@ -425,7 +505,7 @@ class Path(object):
         # Computes the diagonal composition of the path, ignoring decorated rises and valleys.
 
         aux_aword = [self.aword[i] for i in range(
-            self.length) if i not in self.rises and i not in self.valleys] + [-self.shift]
+            self.size) if i not in self.rises and i not in self.valleys] + [-self.shift]
         diagonal_indices = [i for i in range(
             len(aux_aword)) if aux_aword[i] == -self.shift]
         composition = [diagonal_indices[i+1] - diagonal_indices[i]
@@ -436,11 +516,6 @@ class Path(object):
     def gessel(self, read='standard'):
         ls = [x for x in self.reading_word(read)[::-1] if x > 0]
         return set_to_composition(ides(ls), len(ls))
-
-    # animation functions
-
-    def paths(self):
-        return [self.path, []]
 
 class Polyomino(object):
 
@@ -463,24 +538,149 @@ class Polyomino(object):
         self.width = self.getwidth()
         # Returns the polyomino as a collection of cells.
         self.cells = self.getcells()
+        # The vector for shifting Mobjects to center
+        self.to_center = array([-0.5*self.width, -0.5*self.height,0])
 
+    # animation functions
 
-    # Computes the length once. It's stored during the initialization.
+    def draw_bounding_box(self, opacity = 0):
+        return Rectangle(width = self.width + 2*BUFF, height= self.height + 2*BUFF).set_stroke(opacity = opacity)
+
+    def draw_grid(self):
+        
+        grid = []
+        for i in range(self.width + 1):
+            grid += Line(array([i,0,0]),array([i,self.height,0]))
+        for i in range(self.height + 1):
+            grid += Line(array([0,i,0]), array([self.width, i, 0]))
+        
+        grid = VGroup(*grid)
+
+        grid.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        grid = VGroup(grid, bb)
+        grid.scale(STEP)
+
+        return grid
+
+    def draw_redpath(self):
+        path = []
+        point = ORIGIN
+        for i in self.redpath:
+            if i == 0:
+                newpoint = point + RIGHT
+            else:
+                newpoint = point + UP
+            path += Line(point, newpoint, color = MYPINK, width = 5)
+            point = newpoint
+        out = VGroup(*path)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+
+        return out
+
+    def draw_greenpath(self):
+        path = []
+        point = ORIGIN
+        for i in self.greenpath:
+            if i == 0:
+                newpoint = point + RIGHT
+            else:
+                newpoint = point + UP
+            path += Line(point, newpoint, color = MYGREEN, width = 5)
+            point = newpoint
+        out = VGroup(*path)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+
+        return out
+    
+    def draw_paths(self):
+        return VGroup(self.draw_redpath(), self.draw_greenpath())
+
+    def draw_labels(self):
+        out = []
+        for i in range(self.width):
+                for j in range(self.height):
+                    if self.labels[i][j] != None:
+                        out += Tex(f"{self.labels[i][j]}").shift((i + .5)*RIGHT + (j + .5)*UP)
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+    
+    def circle_labels(self, labs):
+        # (i,j) in labs -> circle label in i-th col and j-th row   
+        out = []
+        for (i,j) in labs:
+            out += Circle(color = WHITE, radius = .4).shift((i - .5)*RIGHT + (j - .5)*UP)
+        
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+    
+    def highlight_squares(self, squares):
+        # (i,j) in squares: i-th column, j-th row
+        out = []
+        for (i,j) in squares:
+            out += Square(side_length = 1, color = WHITE).set_opacity(.3).set_stroke(width = 0).shift((i-.5)*RIGHT + (j-.5)*UP)
+        
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.draw_bounding_box())
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
+    
+    def highlight_diagonal(self, diag, color = MYPINK):
+        squares = []
+        y = min(diag, self.height)
+        x = 1 + max(0, diag - y)
+        while True:
+            print("(x,y) = ", (x,y))
+            squares += [(x,y)]
+            x += 1
+            y -= 1
+            if x > self.width or y < 1:
+                break
+        
+        out = self.highlight_squares(squares)
+     
+        return out
+
+    # Math functions
+
     def getlength(self):
+        # Computes the length once. It's stored during the initialization.
         if self.reduced:
             return len(self.redpath) + 2
         else:
             return len(self.redpath)
 
-    # Computes the height once. It's stored during the initialization.
     def getheight(self):
+        # Computes the height once. It's stored during the initialization.
+
         if self.reduced:
             return sum(self.redpath) + 1
         else:
             return sum(self.redpath)
 
-    # Computes the width once. It's stored during the initialization.
     def getwidth(self):
+        # Computes the width once. It's stored during the initialization.
         return self.length - self.height
 
     def getcells(self):
@@ -816,153 +1016,4 @@ class Polyomino(object):
         ls = [x for x in self.reading_word(read)[::-1] if x > 0]
         return set_to_composition(ides(ls), len(ls))
 
-    # animation functions
-
-    def paths(self):
-        return [self.redpath, self.greenpath]
-
-class Drawing(object):
-
-    def __init__(self, CObject):
-        # the CObject (= Combinatorial object) is either a Path or a Polyomino
-        self.paths = CObject.paths()
-        self.labelling = CObject.labels
-
-        self.width = CObject.getwidth()
-        self.height = CObject.getheight()
-        self.to_center = [-.5*self.width, -.5*self.height,0]
-
-        self.bounding_box = Rectangle(width = self.width + 2*BUFF, height= self.height + 2*BUFF).set_stroke(opacity = .5)
-    
-    def is_polyomino(self):
-        # tests if the CObject is a polyomino
-        return len(self.paths[1]) > 0
-
-    def to_CObject(self):
-        if self.is_polyomino():
-            return Polyomino(self.paths[0], self.paths[1], self.labelling)
-        else:
-            return Path(self.paths[0], self.labelling)
-
-    def grid(self):
-        
-        grid = []
-        for i in range(self.width + 1):
-            grid += Line(array([i,0,0]),array([i,self.height,0]))
-        for i in range(self.height + 1):
-            grid += Line(array([0,i,0]), array([self.width, i, 0]))
-        
-        grid = VGroup(*grid)
-
-        grid.shift(self.to_center)
-        bb = deepcopy(self.bounding_box)
-        grid = VGroup(grid, bb)
-        grid.scale(STEP)
-
-        return grid
-    
-    def path(self):
-
-        path = []
-        point = ORIGIN
-        for i in self.paths[0]:
-            if i == 0:
-                newpoint = point + RIGHT
-            else:
-                newpoint = point + UP
-            path += Line(point, newpoint).set_stroke(color = MYPINK, width = 5)
-            point = newpoint
-        out = VGroup(*path)
-
-        path = []
-        point = ORIGIN
-        for i in self.paths[1]:
-            if i == 0:
-                newpoint = point + [1,0,0]
-            else:
-                newpoint = point + [0,1,0]
-            path += Line(point, newpoint).set_stroke(color = MYGREEN, width = 5)
-            point = newpoint
-        out = VGroup(out, *path)
-
-        out.shift(self.to_center)
-        bb = deepcopy(self.bounding_box)
-        out = VGroup(out, bb)
-        out.scale(STEP)
-
-        return out
-            
-    def labels(self):
-        out = []
-        if self.is_polyomino():
-            for i in range(self.width):
-                for j in range(self.height):
-                    if self.labelling[i][j] != None:
-                        out += Tex(f"{self.labelling[i][j]}").shift((i + .5)*RIGHT + (j + .5)*UP)
-        else:
-            aw = self.to_CObject().area_word().word
-            for i in range(self.height):
-                out += Tex(f"{self.labelling[i]}").shift((i + .5)*UP + (i - aw[i] + .5)*RIGHT)
-
-        out = VGroup(*out)
-
-        out.shift(self.to_center)
-        bb = deepcopy(self.bounding_box)
-        out = VGroup(out, bb)
-        out.scale(STEP)
-        return out
-
-    def circle_labels(self, labs, color = WHITE):
-        # for polyominoes: (i,j) in labs -> circle label in i-th col and j-th row   
-        # for paths: i in labs -> circe label in i-th row
-        out = []
-        if self.is_polyomino():
-            for (i,j) in labs:
-                out += Circle(color = color, radius = .4).shift((i - .5)*RIGHT + (j - .5)*UP)
-        else:
-            aw = self.to_CObject().area_word().word
-            for i in labs:
-                out += Circle(color = color, radius = .4).shift((i - .5)*UP + (i - aw[i] - .5)*RIGHT)
-
-        out = VGroup(*out)
-
-        out.shift(self.to_center)
-        bb = deepcopy(self.bounding_box)
-        out = VGroup(out, bb)
-        out.scale(STEP)
-        return out
-
-    def highlight_squares(self, squares, color = MYPINK):
-        # (i,j) in squares: i-th column, j-th row
-        out = []
-        for (i,j) in squares:
-            out += Square(side_length = 1, color = color).set_opacity(.3).set_stroke(width=0).shift((i-.5)*RIGHT + (j-.5)*UP)
-        
-        out = VGroup(*out)
-
-        out.shift(self.to_center)
-        bb = deepcopy(self.bounding_box)
-        out = VGroup(out, bb)
-        out.scale(STEP)
-        return out
-
-    def highlight_diagonal(self, diag, color = MYPINK):
-        squares = []
-        if self.is_polyomino():
-            y = min(diag, self.height)
-            x = 1 + max(0, diag - y)
-            while True:
-                print("(x,y) = ", (x,y))
-                squares += [(x,y)]
-                x += 1
-                y -= 1
-                if x > self.width or y < 1:
-                    break
-        else:
-            for k in range(self.width - abs(diag)):
-                squares += [(-min(0,diag) + k + 1,max(diag,0) + k + 1)]
-
-        out = self.highlight_squares(squares, color = color)
-     
-        return out
-
+  
