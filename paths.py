@@ -176,14 +176,19 @@ class Path(object):
         # These are the indices of the decorated valleys.
         self.valleys = valleys
 
-        # It's the length of the path, which is half the number of steps.
+        # It's the size of the path, which is half the number of steps.
         self.size = self.get_size()
-        # The vector for shifting Mobjects to center
-        self.to_center = array([-0.5*self.size, -0.5*self.size,0])
 
         self.aword = self.area_word().word
         # It's the disance between the main diagonal and the base diagonal.
         self.shift = - min(self.aword)
+
+        # The vector for shifting Mobjects to center
+        self.to_center = array([-0.5*self.size, -0.5*self.size,0])
+        # Bounding box around pictures, necessary to include in each component to ensure exact layering.
+        self.bounding_box = self.draw_bounding_box()
+
+        
 
     # animation functions
 
@@ -199,7 +204,7 @@ class Path(object):
         grid = VGroup(*grid)
 
         grid.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         grid = VGroup(grid, bb)
         grid.scale(STEP)
 
@@ -218,7 +223,7 @@ class Path(object):
         out = VGroup(*path)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
 
@@ -232,10 +237,16 @@ class Path(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
+
+    def draw(self):
+        return VGroup(
+            self.draw_grid(), 
+            self.draw_path(),
+            self.draw_labels())
 
     def circle_labels(self, labs):
         # i in labs -> circe label in i-th row
@@ -246,7 +257,7 @@ class Path(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
@@ -260,7 +271,7 @@ class Path(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
@@ -538,8 +549,12 @@ class Polyomino(object):
         self.width = self.getwidth()
         # Returns the polyomino as a collection of cells.
         self.cells = self.getcells()
+        
         # The vector for shifting Mobjects to center
         self.to_center = array([-0.5*self.width, -0.5*self.height,0])
+        # Bounding box around pictures, necessary to include in each component to ensure exact layering.
+        self.bounding_box = self.draw_bounding_box()
+
 
     # animation functions
 
@@ -557,7 +572,7 @@ class Polyomino(object):
         grid = VGroup(*grid)
 
         grid.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         grid = VGroup(grid, bb)
         grid.scale(STEP)
 
@@ -576,7 +591,7 @@ class Polyomino(object):
         out = VGroup(*path)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
 
@@ -595,7 +610,7 @@ class Polyomino(object):
         out = VGroup(*path)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
 
@@ -613,11 +628,17 @@ class Polyomino(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
-    
+
+    def draw(self):
+        return VGroup(
+            self.draw_grid(), 
+            self.draw_paths(),
+            self.draw_labels())
+
     def circle_labels(self, labs):
         # (i,j) in labs -> circle label in i-th col and j-th row   
         out = []
@@ -627,7 +648,7 @@ class Polyomino(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
@@ -641,7 +662,7 @@ class Polyomino(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.draw_bounding_box())
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
