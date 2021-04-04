@@ -13,7 +13,7 @@ MYPINK = "#E20851"
 MYGREEN = "#51e208"
 # Constants
 STEP = .8   # size of a step of a lattice path
-BUFF = .2   # fraction of step that is buffer for bounding box 
+BUFF = .4   # fraction of step that is buffer for bounding box 
 
 # GENERATORS
 
@@ -241,12 +241,28 @@ class Path(object):
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
+    
+    def draw_decorations(self):
+        out = []
+        for i in self.rises:
+            out += MathTex(r"\ast").shift((i-.5)*UP + (i - self.aword[i] - 1.2)*RIGHT)
+        for i in self.valleys:
+            out += MathTex(r"\bullet").shift((i-.5)*UP + (i - self.aword[i] - 1.2)*RIGHT)
+        
+        out = VGroup(*out)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.bounding_box.set_stroke(opacity = .5))
+        out = VGroup(out, bb)
+        out.scale(STEP)
+        return out
 
     def draw(self):
         return VGroup(
             self.draw_grid(), 
             self.draw_path(),
-            self.draw_labels())
+            self.draw_labels(),
+            self.draw_decorations())
 
     def circle_labels(self, labs):
         # i in labs -> circe label in i-th row
