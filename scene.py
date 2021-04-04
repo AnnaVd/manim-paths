@@ -1,7 +1,7 @@
 from manim import*
 from paths import* 
 
-P = Path([1,0,1,0,1,1,0,0], [2,3,1,4], rises = [1], valleys=[2])
+P = Path([1,0,1,0,1,1,0,0], [2,3,1,2])
 Po = Polyomino([1,1,0,0,0], 
 [0,0,1,0,1],
 array([[3,4],[1,None],[None,2]])
@@ -29,12 +29,14 @@ class Path(Scene):
             Create(Po.circle_labels([(1,2)]).to_edge(RIGHT))
         )
         self.play(
-            Create(P.draw_decorations().to_edge(LEFT))
+            Create(P.draw_decorations().to_edge(LEFT)),
+            Create(P.draw_diagonal(2).to_edge(LEFT))
         )
         self.play(
             Create(P.highlight_diagonal(-1).to_edge(LEFT)),
             Create(Po.highlight_diagonal(3).to_edge(RIGHT))
         )
+        self.play(Write(P.monomial()))
         
         #self.play(ShowSubmobjectsOneByOne(D22))
         #self.play(ShowCreation(grid))

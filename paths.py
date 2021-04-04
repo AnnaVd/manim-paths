@@ -1,7 +1,7 @@
 from itertools import combinations, product
 from more_itertools.more import distinct_combinations
 from multiset import Multiset as multiset
-from numpy import array, floor, gcd
+from numpy import array, diag, floor, gcd
 from manim import*
 from copy import deepcopy
 
@@ -257,13 +257,32 @@ class Path(object):
         out.scale(STEP)
         return out
 
-    def draw(self):
-        return VGroup(
+    def draw_diagonal(self, diag):
+        # draw the line y = x + diag in the grid
+        out= Line(
+            array([-min(0,diag), max(diag,0),0]),
+            array([self.size - max(diag,0), self.size + min(0,diag),0])
+        ).set_opacity(.4)
+        out.shift(self.to_center)
+        bb = deepcopy(self.bounding_box)
+        out = VGroup(out, bb)
+        out.scale(STEP)
+
+        return out
+
+    def draw(self, diagonal = False):
+        out = VGroup(
             self.draw_grid(), 
             self.draw_path(),
             self.draw_labels(),
             self.draw_decorations())
-
+        if diagonal: 
+            out = VGroup(
+                out,
+                self.draw_diagonal(-self.shift)
+            )
+        return out
+ 
     def circle_labels(self, labs):
         # i in labs -> circe label in i-th row
         out = []
@@ -300,6 +319,28 @@ class Path(object):
         out = self.highlight_squares(squares)
      
         return out
+
+    def monomial(self, qstat = "dinv", tstat = "area"):
+        # the tex mobject that is q^qstat(p) t^tstat(p) x^p
+        string = ""
+
+        if getattr(self, qstat)() == 1:
+            string += "q"
+        elif getattr(self, qstat)() > 1:
+            string += "q^{%d}" % getattr(self, qstat)()
+        
+        if getattr(self, tstat)() == 1:
+            string += "t"
+        elif getattr(self, tstat)() > 1:
+            string += "t^{%d}" % getattr(self, tstat)()
+        
+        for i in range(max(self.labels)):
+            if self.labels.count(i+1) == 1:
+                string += "x_{%d}" %(i+1)
+            if self.labels.count(i+1) >1:
+                string += "x_{%d}^{%d}" %(i+1,self.labels.count(i+1))
+
+        return MathTex(string)
 
     # Math functions
 
