@@ -9,11 +9,16 @@ from permtools import *  # pylint: disable=unused-wildcard-import
 
 # ANIMATION CONFIGURATION
 # custom colors
-MYPINK = "#E20851" 
-MYGREEN = "#51e208"
+#PINK = "#E20851"
+config.background_color = "#003361"
+PINK = "#E94E6E" 
+GREEN = "#51e208"
+LIGHTBLUE = "#64FBF9"
 # Constants
 STEP = .8   # size of a step of a lattice path
 BUFF = .4   # fraction of step that is buffer for bounding box 
+def slide_title(text):
+    return text.to_corner(UP + LEFT).shift(.2*UP + .2*LEFT)
 
 # GENERATORS
 
@@ -218,7 +223,7 @@ class Path(object):
                 newpoint = point + RIGHT
             else:
                 newpoint = point + UP
-            path += Line(point, newpoint, color = MYPINK, width = 5)
+            path += Line(point, newpoint, color = PINK, width = 5)
             point = newpoint
         out = VGroup(*path)
 
@@ -252,7 +257,7 @@ class Path(object):
         out = VGroup(*out)
 
         out.shift(self.to_center)
-        bb = deepcopy(self.bounding_box.set_stroke(opacity = .5))
+        bb = deepcopy(self.bounding_box)
         out = VGroup(out, bb)
         out.scale(STEP)
         return out
@@ -301,7 +306,7 @@ class Path(object):
         # (i,j) in squares: i-th column, j-th row
         out = []
         for (i,j) in squares:
-            out += Square(side_length = 1, color = MYPINK).set_opacity(.3).set_stroke(width = 0).shift((i-.5)*RIGHT + (j-.5)*UP)
+            out += Square(side_length = 1, color = PINK).set_opacity(.3).set_stroke(width = 0).shift((i-.5)*RIGHT + (j-.5)*UP)
         
         out = VGroup(*out)
 
@@ -643,7 +648,7 @@ class Polyomino(object):
                 newpoint = point + RIGHT
             else:
                 newpoint = point + UP
-            path += Line(point, newpoint, color = MYPINK, width = 5)
+            path += Line(point, newpoint, color = PINK, width = 5)
             point = newpoint
         out = VGroup(*path)
 
@@ -662,7 +667,7 @@ class Polyomino(object):
                 newpoint = point + RIGHT
             else:
                 newpoint = point + UP
-            path += Line(point, newpoint, color = MYGREEN, width = 5)
+            path += Line(point, newpoint, color = GREEN, width = 5)
             point = newpoint
         out = VGroup(*path)
 
@@ -724,7 +729,7 @@ class Polyomino(object):
         out.scale(STEP)
         return out
     
-    def highlight_diagonal(self, diag, color = MYPINK):
+    def highlight_diagonal(self, diag, color = PINK):
         squares = []
         y = min(diag, self.height)
         x = 1 + max(0, diag - y)
@@ -1094,4 +1099,21 @@ class Polyomino(object):
         ls = [x for x in self.reading_word(read)[::-1] if x > 0]
         return set_to_composition(ides(ls), len(ls))
 
-  
+class YT(object):
+    def __init__(self, partition, labels = None):
+        self.partition = partition
+        self.labels = labels
+
+    def draw(self):
+        out = VGroup()
+        out2 = VGroup()
+        k =0
+        for i in range(len(self.partition)):
+            for j in range(self.partition[i]):
+                out.add(Square(side_length=1).move_to(i*UP + j*RIGHT))
+                if self.labels != None:
+                    lab = MathTex(f'{self.labels[k]}').move_to(i*UP + j*RIGHT)
+                    out.add(lab)
+                    k += 1
+        out.shift(-out.get_center())  
+        return out
