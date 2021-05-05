@@ -5,6 +5,8 @@ from numpy import array, diag, floor, gcd
 from manim import*
 from copy import deepcopy
 
+from pygments import highlight
+
 from permtools import *  # pylint: disable=unused-wildcard-import
 
 # ANIMATION CONFIGURATION
@@ -223,7 +225,7 @@ class Path(object):
                 newpoint = point + RIGHT
             else:
                 newpoint = point + UP
-            path += Line(point, newpoint, color = PINK, width = 5)
+            path += Line(point, newpoint, color = PINK, width = 6)
             point = newpoint
         out = VGroup(*path)
 
@@ -250,9 +252,9 @@ class Path(object):
     def draw_decorations(self):
         out = []
         for i in self.rises:
-            out += MathTex(r"\ast").shift((i-.5)*UP + (i - self.aword[i] - 1.2)*RIGHT)
+            out += MathTex(r"\ast").shift((i+.5)*UP + (i - self.aword[i] - .5)*RIGHT)
         for i in self.valleys:
-            out += MathTex(r"\bullet").shift((i-.5)*UP + (i - self.aword[i] - 1.2)*RIGHT)
+            out += MathTex(r"\bullet").shift((i+.5)*UP + (i - self.aword[i] - .5)*RIGHT)
         
         out = VGroup(*out)
 
@@ -262,7 +264,7 @@ class Path(object):
         out.scale(STEP)
         return out
 
-    def draw_diagonal(self, diag):
+    def draw_diagonal(self, diag=0):
         # draw the line y = x + diag in the grid
         out= Line(
             array([-min(0,diag), max(diag,0),0]),
@@ -292,7 +294,7 @@ class Path(object):
         # i in labs -> circe label in i-th row
         out = []
         for i in labs:
-                out += Circle(color = WHITE, radius = .4).shift((i - .5)*UP + (i - self.aword[i] - .5)*RIGHT)
+                out += Circle(color = WHITE, radius = .4).shift((i - .5)*UP + (i - self.aword[i-1]  - .5)*RIGHT)
 
         out = VGroup(*out)
 
@@ -325,7 +327,37 @@ class Path(object):
      
         return out
 
-    def monomial(self, qstat = "dinv", tstat = "area"):
+    def higlight_area(self):
+        # highlights the squares contributing to the area 
+        out = []
+        aw = [a + self.shift for a in self.area_word().word]
+        for j,a in enumerate(aw):
+            if j not in self.rises:
+                for i in range(a):
+                    out += [(j-i + self.shift, j + 1)]
+        return self.highlight_squares(out)
+
+    def higlight_steps(self, steps):
+        path = []
+        point = ORIGIN
+        for index, i in enumerate(self.path):
+            if i == 0:
+                newpoint = point + RIGHT
+            else:
+                newpoint = point + UP
+            if index+1 in steps:
+                path += Line(point, newpoint, color = GREEN, width = 6)
+            point = newpoint
+        out = VGroup(*path)
+
+        out.shift(self.to_center)
+        bb = deepcopy(self.bounding_box)
+        out = VGroup(out, bb)
+        out.scale(STEP)
+
+        return out
+
+    def monomial_string(self, qstat = "dinv", tstat = "area"):
         # the tex mobject that is q^qstat(p) t^tstat(p) x^p
         string = ""
 
@@ -345,7 +377,7 @@ class Path(object):
             if self.labels.count(i+1) >1:
                 string += "x_{%d}^{%d}" %(i+1,self.labels.count(i+1))
 
-        return MathTex(string)
+        return string
 
     # Math functions
 
