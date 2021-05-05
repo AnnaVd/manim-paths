@@ -9,6 +9,10 @@ from pygments import highlight
 
 from permtools import *  # pylint: disable=unused-wildcard-import
 
+
+# Default enumeration is pyhton enumeration: starts at zero (labels, valleys)
+
+
 # ANIMATION CONFIGURATION
 # custom colors
 #PINK = "#E20851"
@@ -206,7 +210,7 @@ class Path(object):
         grid = []
         for i in range(self.size + 1):
             grid += Line(array([i,0,0]),array([i,self.size,0]))
-            grid += Line(array([0,i,0]), array([self.size, i, 0]))
+            grid += Line(array([0,i,0]), array([self.size, i, 0])) 
         
         grid = VGroup(*grid)
 
@@ -294,7 +298,7 @@ class Path(object):
         # i in labs -> circe label in i-th row
         out = []
         for i in labs:
-                out += Circle(color = WHITE, radius = .4).shift((i - .5)*UP + (i - self.aword[i-1]  - .5)*RIGHT)
+                out += Circle(color = WHITE, radius = .4).shift((i + .5)*UP + (i - self.aword[i]  + .5)*RIGHT)
 
         out = VGroup(*out)
 
@@ -308,7 +312,7 @@ class Path(object):
         # (i,j) in squares: i-th column, j-th row
         out = []
         for (i,j) in squares:
-            out += Square(side_length = 1, color = PINK).set_opacity(.3).set_stroke(width = 0).shift((i-.5)*RIGHT + (j-.5)*UP)
+            out += Square(side_length = 1, color = PINK).set_opacity(.3).set_stroke(width = 0).shift((i + .5)*RIGHT + (j + .5)*UP)
         
         out = VGroup(*out)
 
@@ -321,7 +325,7 @@ class Path(object):
     def highlight_diagonal(self, diag):
         squares = []
         for k in range(self.size - abs(diag)):
-            squares += [(-min(0,diag) + k + 1,max(diag,0) + k + 1)]
+            squares += [(-min(0,diag) + k,max(diag,0) + k)]
 
         out = self.highlight_squares(squares)
      
@@ -334,10 +338,11 @@ class Path(object):
         for j,a in enumerate(aw):
             if j not in self.rises:
                 for i in range(a):
-                    out += [(j-i + self.shift, j + 1)]
+                    out += [(j- i -1 + self.shift, j)]
         return self.highlight_squares(out)
 
     def higlight_steps(self, steps):
+        # higlights the steps of the path whose index lies in steps
         path = []
         point = ORIGIN
         for index, i in enumerate(self.path):
@@ -345,7 +350,7 @@ class Path(object):
                 newpoint = point + RIGHT
             else:
                 newpoint = point + UP
-            if index+1 in steps:
+            if index in steps:
                 path += Line(point, newpoint, color = GREEN, width = 6)
             point = newpoint
         out = VGroup(*path)

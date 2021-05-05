@@ -1,4 +1,3 @@
-from re import S
 from paths import*
 
 class titleslide(Scene):
@@ -458,54 +457,54 @@ class slide9(Scene):
         #dinv
         dinvtxt = Tex("Dinv: \\\\", "primary dinv", " + secondary dinv \\\\", "+ bonus dinv \\\\", "Here dinv = %d" %pspath.dinv()).scale(.8).shift(wrd)
         dinvtxt[0].set_color(LIGHTBLUE)
+        lab0 = pspath.circle_labels([0]).shift(pic).scale(sc) 
         lab1 = pspath.circle_labels([1]).shift(pic).scale(sc) 
-        lab2 = pspath.circle_labels([2]).shift(pic).scale(sc) 
+        lab2 = pspath.circle_labels([2]).shift(pic).scale(sc)
         lab3 = pspath.circle_labels([3]).shift(pic).scale(sc)
         lab4 = pspath.circle_labels([4]).shift(pic).scale(sc)
-        lab5 = pspath.circle_labels([5]).shift(pic).scale(sc)
         #primary
         mone_diag = pspath.highlight_diagonal(-1).set_color(LIGHTBLUE).shift(pic).scale(sc)
   
         self.play(Write(dinvtxt[0]))
         self.wait(1)
         self.play(Create(mone_diag),Write(dinvtxt[1]))
-        lab = deepcopy(lab1)
+        lab = deepcopy(lab0)
         self.play(
-            Create(lab5),
+            Create(lab4),
+            Create(lab)
+        )
+        self.wait(1)
+        self.play(lab.animate.become(deepcopy(lab2)))
+        self.wait(1)
+        self.play(lab.animate.become(deepcopy(lab3)))
+        self.wait(1)
+        self.play(Uncreate(lab4), Uncreate(lab))
+        self.wait(1)
+        #secondary
+        zero_diag = pspath.highlight_diagonal(0).set_color(GREEN).shift(pic).scale(sc)
+        self.play(Create(zero_diag), Write(dinvtxt[2]))
+        lab = deepcopy(lab2)
+        self.play(
+            Create(lab1),
             Create(lab)
         )
         self.wait(1)
         self.play(lab.animate.become(deepcopy(lab3)))
         self.wait(1)
+        lab4 = pspath.circle_labels([4]).shift(pic).scale(sc)
         self.play(lab.animate.become(deepcopy(lab4)))
         self.wait(1)
-        self.play(Uncreate(lab5), Uncreate(lab))
-        self.wait(1)
-        #secondary
-        zero_diag = pspath.highlight_diagonal(0).set_color(GREEN).shift(pic).scale(sc)
-        self.play(Create(zero_diag), Write(dinvtxt[2]))
-        lab = deepcopy(lab3)
-        self.play(
-            Create(lab2),
-            Create(lab)
-        )
-        self.wait(1)
-        self.play(lab.animate.become(deepcopy(lab4)))
-        self.wait(1)
-        lab5 = pspath.circle_labels([5]).shift(pic).scale(sc)
-        self.play(lab.animate.become(deepcopy(lab5)))
-        self.wait(1)
-        self.play(Uncreate(lab2), Uncreate(lab), FadeOut(mone_diag), FadeOut(zero_diag))
+        self.play(Uncreate(lab1), Uncreate(lab), FadeOut(mone_diag), FadeOut(zero_diag))
         self.wait(1)
         #bonus
         diag = pspath.draw_diagonal(0).shift(pic).scale(sc)
         self.play(Write(dinvtxt[3]))
         self.play(Create(diag))
-        lab = lab1
+        lab = lab0
         self.play(Create(lab))
-        self.play(lab.animate.become(deepcopy(lab3)))
+        self.play(lab.animate.become(deepcopy(lab2)))
         self.wait(1)
-        self.play(lab.animate.become(deepcopy(lab5)))
+        self.play(lab.animate.become(deepcopy(lab4)))
         self.wait(1)
         self.play(FadeOut(diag), FadeOut(lab))
         self.play(Write(dinvtxt[4]))
@@ -522,7 +521,7 @@ class slide10(Scene):
         picture = pspath.draw().shift(pic).scale(sc)
         self.add(picture)
 
-        valleys = pspath.higlight_steps([2,6,10]).shift(pic).scale(sc)
+        valleys = pspath.higlight_steps([1,5,9]).shift(pic).scale(sc)
         valtxt = Tex("Choose some \\\\", "contractible valleys ", "to decorate").scale(.7).shift(wrd)
         valtxt[1].set_color(LIGHTBLUE)
         decs = dpspath.draw_decorations().shift(pic).scale(sc)
@@ -854,8 +853,8 @@ class slide17(Scene):
         bigdiag = P0.draw_diagonal().shift(pic).scale(sc)
         smalldiag = P2.draw_diagonal().shift(pic).scale(sc)
 
-        maxup = P0.circle_labels([3,10]).shift(pic).scale(sc)
-        maxdiag = P0.circle_labels([4,7]).shift(pic).scale(sc)
+        maxup = P0.circle_labels([2,9]).shift(pic).scale(sc)
+        maxdiag = P0.circle_labels([3,6]).shift(pic).scale(sc)
         
 
         perp = Tex("Select maximal labels (apply $h_j^\\perp$)").scale(.8).shift(wrd + 2.5 * UP)
@@ -950,3 +949,161 @@ class slide17(Scene):
             *[ShrinkToCenter(m) for m in [p0,lp0,dp0,biggrid,bigdiag]]
         )
         self.wait(1)
+
+# delta -> delta square
+class slide18(Scene):
+    def construct(self): 
+        title = slide_title(Tex("Delta $\\Rightarrow$ Delta square"))
+        strat1 = Tex("Build from scratch the set $S$ \\\\ of square paths with a fixed set of \\\\ (decorated) labels in each diagonal").scale(.8).shift(2.5*UP + 3.5*RIGHT)
+        strat2 = Tex("get factorisation of \[ \\sum_{P\\in S}q^{\\text{dinv}(P)}t^{\\text{area}(P)}x^P \]").scale(.8).next_to(strat1, DOWN)
+        strat3 = Tex("makes it clear how to shift \\\\ all labels to one diagonal higher").scale(.8).next_to(strat2, DOWN)
+        strat4 = Tex("$\\rightarrow$ square paths in terms of Dyck paths").scale(.8).next_to(strat3, DOWN)
+
+
+        
+        p = Path(path = [0,1,0,1,0,1,1,0,1,1,0,0,1,1,0,0], labels = [1,2,1,3,2,4,2,4], valleys = [1])
+        sp = Path(path = [1,0,1,0,1,1,0,1,1,0,0,1,1,0,0,0], labels = [1,2,1,3,2,4,2,4], valleys = [1])
+
+        grid = p.draw_grid().shift(3.5*LEFT + .5*UP).scale(.8)
+        path = p.draw_path().shift(3.5*LEFT + .5*UP).scale(.8)
+        labels = p.draw_labels().shift(3.5*LEFT + .5*UP).scale(.8)
+        decs = p.draw_decorations().shift(3.5*LEFT + .5*UP).scale(.8)
+
+        m1 = p.highlight_diagonal(-1).set_color(GREEN).shift(3.5*LEFT + .5*UP).scale(.8)
+        m2 = p.highlight_diagonal(0).set_color(GREEN).shift(3.5*LEFT+ .5*UP).scale(.8)
+        m3 = p.highlight_diagonal(1).set_color(GREEN).shift(3.5*LEFT+ .5*UP).scale(.8) 
+        sm = sp.draw().shift(3.5*LEFT+ .5*UP).scale(.8)
+
+        dw = MathTex("&1\\quad 1 \\quad \\bullet 2& \\\\", "&2\\quad 2 \\quad 3 \\\\", "&4\\quad 4"
+            ).scale(.6).next_to(m1, DOWN)
+
+        self.play(Write(title))
+        self.play(Write(strat1), Create(VGroup(grid, path, labels, decs)))
+        self.wait(1)
+        self.play(FadeIn(m1), Write(dw[0]))
+        self.wait(1)
+        self.play(FadeOut(m1), FadeIn(m2), Write(dw[1]))
+        self.wait(1)
+        self.play(FadeOut(m2), FadeIn(m3), Write(dw[2]))
+        self.wait(1)
+        self.play(FadeOut(m3))
+        self.play(Write(strat2))
+        self.wait(1)
+        self.play(Write(strat3))
+        self.wait(1)
+        self.play(
+            path.animate.become(sp.draw_path().shift(3.5*LEFT + .5*UP).scale(.8)),
+            labels.animate.become(sp.draw_labels().shift(3.5*LEFT + .5*UP).scale(.8)),
+            decs.animate.become(sp.draw_decorations().shift(3.5*LEFT + .5*UP).scale(.8)),
+            run_time = 3
+        )
+        self.wait(1)
+        self.play(Write(strat4))
+        self.wait(1)
+        self.play(FadeOut(VGroup(grid, path, decs, labels, strat1,strat2,strat3,strat4, dw)))
+
+#tree
+class slide19(Scene):
+    def construct(self): 
+        title = slide_title(Tex("Delta $\\Rightarrow$ Delta square"))
+        #sub = Tex("Constructing all paths with diagonal word: $11(\\bullet 2)\\quad 223 \\quad 4$").align_to(title,LEFT).scale(.8)
+
+        p0 = MathTex("\\emptyset")
+
+        t1 = Tex("$3$ in $0$-diagonal").scale(.8)
+        p1 = Path(path = [1,0], labels = [3]).draw().scale(.55)
+
+        t2 = Tex("$2,2$ in $0$-diagonal").scale(.8)
+        p21 = Path(path = [1,0,1,0,1,0], labels = [3,2,2]).draw().scale(.55) #chosen
+        p22 = Path(path = [1,0,1,0,1,0], labels = [2,3,2]).draw().scale(.55)
+        p23 = Path(path = [1,0,1,0,1,0], labels = [2,2,3]).draw().scale(.55)
+
+        t3 = Tex("$4,4$ in $1$-diagonal").scale(.8)
+        p31 = Path(path = [1,0,1,0,1,1,0,1,0,0], labels = [3,2,2,4,4]).draw().scale(.55)
+        p32 = Path(path = [1,0,1,1,0,0,1,1,0,0], labels = [3,2,4,2,4]).draw().scale(.55) #chosen
+        p33 = Path(path = [1,0,1,1,0,1,0,0,1,0], labels = [3,2,4,4,2]).draw().scale(.55)
+        p34 = Path(path = [1,1,0,0,1,0,1,1,0,0], labels = [3,4,2,2,4]).draw().scale(.55)
+
+        t4 = Tex("$1,1$ in $(-1)$-diagonal").scale(.8)
+        p41 = Path(path = [0,1,0,1,1,0,1,1,0,0,1,1,0,0], labels = [1,1,3,2,4,2,4]).draw().scale(.55) #chosen
+        p42 = Path(path = [0,1,1,0,0,1,1,1,0,0,1,1,0,0], labels = [1,3,1,2,4,2,4]).draw().scale(.55) 
+        p43 = Path(path = [1,0,0,1,0,1,1,1,0,0,1,1,0,0], labels = [3,1,1,2,4,2,4]).draw().scale(.55)
+        
+        t5 = Tex("$\\bullet 2$ in $(-1)$-diagonal").scale(.8)
+        p51 = Path(path = [0,1,0,1,0,1,1,0,1,1,0,0,1,1,0,0], labels = [2,1,1,3,2,2,4,4], valleys = [0]).draw().scale(.55)
+        p52 = Path(path = [0,1,0,1,0,1,1,0,1,1,0,0,1,1,0,0], labels = [1,2,1,3,2,2,4,4], valleys = [1]).draw().scale(.55)
+        p53 = Path(path = [0,1,0,1,0,1,1,0,1,1,0,0,1,1,0,0], labels = [1,1,2,3,2,2,4,4], valleys = [2]).draw().scale(.55)
+        
+        top = [0,2,0]
+        
+        
+        d0 = Tex("dinv: + 0").scale(.8)
+        d1 = Tex("dinv: + 1").scale(.8)
+        d2 = Tex("dinv: + 2").scale(.8)
+        d2bis = Tex("dinv: + 2").scale(.8)
+        #d3 = Tex("dinv: + 3").scale(.8)
+        dots = Tex("$\\cdots$")
+
+        self.add(title)
+        self.wait(1)
+        
+        bot = 0
+        self.play(Write(p0.shift(top)))
+        self.wait(1)
+        self.play(Write(t1.next_to(p0,DOWN)))
+        self.play(Create(p1.move_to([0,bot,0])), Write(d0.next_to(p1, DOWN)))
+        self.wait(1)
+        self.play(FadeOut(VGroup(p0,d0,t1)))
+        self.play(ApplyMethod(p1.move_to, top))
+        self.wait(1)
+
+        bot = -1
+        self.play(Write(t2.next_to(p1,DOWN)))
+        self.wait(1)
+        self.play(Create(p21.move_to([-3,bot,0])), Write(d0.next_to(p21, DOWN, buff = .1)))
+        self.play(Create(p22.move_to([0,bot,0])), Write(d1.next_to(p22, DOWN, buff = .1)))
+        self.play(Create(p23.move_to([3,bot,0])), Write(d2.next_to(p23, DOWN, buff = .1)))
+        self.wait(1)
+        self.play(FadeOut(VGroup(p22,p23,d0,d1,d2,t2, p1)))
+        self.play(ApplyMethod(p21.move_to, top))
+        self.wait(1)
+
+        self.play(Write(t3.next_to(p21,DOWN)))
+        self.wait(1)
+        self.play(Create(p31.move_to([-4.5,bot,0])), Write(d0.next_to(p31, DOWN, buff = .1)))
+        self.play(Create(p32.move_to([-1.5, bot, 0])), Write(d1.next_to(p32, DOWN, buff = .1)))
+        self.play(Create(p33.move_to([1.5,bot,0])), Write(d2.next_to(p33, DOWN, buff = .1)))
+        self.play(Create(p34.move_to([4.5,bot,0])), Write(d2bis.next_to(p34, DOWN, buff = .1)))
+        self.play(Write(dots.move_to([6,bot,0])))
+        self.wait(1)
+        self.play(FadeOut(VGroup(p31,p33,p34,d0,d1,d2,d2bis,p21,t3,dots)))
+        self.play(ApplyMethod(p32.move_to,top))
+        self.wait(1)
+
+        bot = -1.5
+        self.play(Write(t4.next_to(p32,DOWN)))
+        self.wait(1)
+        self.play(Create(p41.move_to([-4,bot,0])), Write(d0.next_to(p41, DOWN, buff = .1)))
+        self.play(Create(p42.move_to([0, bot, 0])), Write(d1.next_to(p42, DOWN, buff = .1)))
+        self.play(Create(p43.move_to([4,bot,0])), Write(d2.next_to(p43, DOWN, buff = .1)))
+        self.play(Write(dots.move_to([6,bot,0])))
+        self.wait(1)
+        self.play(FadeOut(VGroup(p42,p43,d0,d1,d2,p32,t4,dots)))
+        top = [0,2.3,0]
+        self.play(ApplyMethod(p41.move_to, top))
+        self.wait(1)
+
+        self.play(Write(t5.next_to(p41,RIGHT)))
+        self.wait(1)
+        self.play(Create(p51.move_to([-4.5,bot,0])), Write(d0.next_to(p51, DOWN, buff = .1)))
+        self.play(Create(p52.move_to([0, bot, 0])), Write(d1.next_to(p52, DOWN, buff = .1)))
+        self.play(Create(p53.move_to([4.5,bot,0])), Write(d2.next_to(p53, DOWN, buff = .1)))
+        self.play(Write(dots.move_to([6.7,bot,0])))
+        self.wait(1)
+        self.play(FadeOut(VGroup(p51,p52,p53,d0,d1,d2,p41,t5,dots,title)))
+        self.wait(1)    
+
+# thanks
+class slide19(Scene):
+    def construct(self): 
+        self.play(Write(Tex("Thank you for your attention!")))
