@@ -66,7 +66,7 @@ class slide2(Scene):
         space[3].set_color(PINK)
         space.to_edge(DOWN)
 
-        dim = MathTex("\\dim(\\Lambda_{\\mathbb K}^{(n)}) = \\text{\\# partitions } \\lambda \\vdash n").scale(.8).align_to(title, LEFT).shift(2.8*UP)
+        dim = Tex("$\\dim(\\Lambda_{\\mathbb K}^{(n)})$ = $\\#$", " partitions ", "$\\lambda \\vdash n$").scale(.8).align_to(title, LEFT).shift(2.8*UP)
 
         self.add(title)
         for w in what:
@@ -152,7 +152,7 @@ class slide3(Scene):
             )
             self.wait(1)                
         self.play(*[FadeOut(o) for o in [T,ne,fs,fe,basis,partition, dim, partbox]])
-        self.wait(4)
+        self.wait(1)
 
 #symfun macdonald        
 class slide4(Scene):
@@ -528,6 +528,7 @@ class slide10(Scene):
         stats = VGroup(
             Tex("Area remains unchanged"),
             Tex("ignore dinv pairs with left decorated label"),
+            Tex("substract 1 dinv for each decoration"),
             Tex(f"here, dinv = {dpspath.dinv()}")
         ).scale(.7).arrange(DOWN).shift(wrd + DOWN)
 
@@ -544,6 +545,8 @@ class slide10(Scene):
         self.play(Write(stats[1]))
         self.wait(1)
         self.play(Write(stats[2]))
+        self.wait(1)
+        self.play(Write(stats[3]))
         self.wait(1)
 
         picture.add(decs)
@@ -1104,6 +1107,7 @@ class slide19(Scene):
         self.wait(1)    
 
 # thanks
-class slide19(Scene):
+class slide20(Scene):
     def construct(self): 
         self.play(Write(Tex("Thank you for your attention!")))
+        self.wait(4)
