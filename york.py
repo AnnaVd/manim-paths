@@ -247,7 +247,7 @@ class slide6(Scene):
         SDCk = MathTex("{{ \\mathcal{SDC} }}_{n,k}  := ( {{ R_n/I^{\\mathfrak{S}_n} }} )^{(k)}").scale(.8).shift(.5*DOWN)
         hom = Tex(r"\\ Homogeneous $\theta$-degree $k$").scale(.8).shift(DOWN)
 
-        deltathm = Tex(r"Conjecture ",r"$\Delta'_{e_{n-k-1} } e_n = \mathcal{F}_{q,t}(\mathcal{SDC}_{n-k})$").scale(.8).move_to(2.5*DOWN + 3.2*LEFT)
+        deltathm = Tex(r"Conjecture ",r"$\Delta'_{e_{n-k-1} } e_n = \mathcal{F}_{q,t}(\mathcal{SDC}_{n,k})$").scale(.8).move_to(2.5*DOWN + 3.2*LEFT)
         deltathm[0].set_color(LIGHTBLUE)        
         deltathm.add(SurroundingRectangle(deltathm, buff = .2).set_color(LIGHTBLUE))
         delta = Tex(r"$\Delta_f, \Delta'_f$ for $f\in\Lambda$ are \\ Macdonald eigenoperators \\ generalising $\nabla$").scale(.8).move_to(2.5*DOWN + 3.5*RIGHT)

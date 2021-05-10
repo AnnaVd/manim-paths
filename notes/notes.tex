@@ -1,6 +1,7 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
+\usepackage{geometry}
 \usepackage{enumitem}
 \newcommand{\KK}{\mathbb{K}}
 \newcommand{\QQ}{\mathbb{Q}}
@@ -10,23 +11,43 @@
     \begin{itemize}
         \item Thank you to the organizers for the opportunity to speak
         \item don't hesitate to interrupt to ask questions
-        \item explain what Delta conjecture is and discuss some recent results obtained with Alessandro Iraci 
+        \item this talk is about the ``Delta conjectures''
+        \item There is more than one
+        \item the goal of this talk is to discuss two logical implications between conjectures we established recently (with Alessandro Iraci)
+        \item let's get started 
         \item this sentence contains three elements
+        \item before the break, I will take some time to explain what I mean by ``interesting symmetric function''
+        \item after the break, I will state a bunch of combinatorial formulae and discuss the implications between them that we discovered
     \end{itemize}
 
     \section{Symmetric functions}
     \begin{itemize}
-        \item $e_n$ is the sum of all the products of $n$ distinct variables
-        \item $e_2$ is an example of a symmetric function of homogeneous degree $2$, indeed all its monomials are of degree two
+        \item I know most of you will know what a symmetric function is, but just in case someone is not familiar, a symmetric function is 
+        \item for example $e_2$ here is the sum of all the products of $2$ distinct variables, 
+        \item in general, $e_n$, the $n$-th elementary symmmetric function, is the sum of the product of $n$ variables
+        \item $e_2$ is an example of a symmetric function of homogeneous degree $2$, because all its monomials are of degree two
         \item it is easy to see that any symmetric function may be written as a finite sum of homogeneous symmetric functions
-        \item in other words the space $\Lambda_{\KK}$ is graded by homogeneous degree
+        \item in other words the space of symmetric functions, which we denote $\Lambda_{\KK}$ is graded by homogeneous degree
         \item the dimension of the space $\Lambda_\KK^{(n)}$ of symmetric functions of homogeneous degree $n$ is exactly the number of partitions of $n$
+    \end{itemize}
+    \subsection{Partitions}
+    \begin{itemize}
         \item a partition of $n$ is a decreasing vector of positive integers that sum to $n$
         \item the Ferrers diagram of a partition has as many boxes in the $i$-th row from the bottom as the $i$-th entry of the partition
+    \end{itemize}
+    \subsection{Symfun basis}
+    \begin{itemize}
         \item We discuss here some famous basis of $\Lambda_\KK^{(n)}$ that will be relevant to this talk.
-        \item the monomial associated to a SSYT encodes its filling, that is the exponent of $x_i$ equals the number of $i$'s in the filling.
+        \item we have already encountered the $n$-th elementary symmetric function. Well for any partition $\lambda$, $e_\lambda$ is defined multiplicatively. So here $e_{(2,1)}=e_2 \times e_1$. 
+        \item the homogeneous symmetric functions are very similar except that the $n$-th homogeneous symmetric function $h_n$ is the sum of all the products of \emph{any} $n$ variables, not necessarily disctinct.
+        \item the $n$-th power symmetric function is the sum of all the variables to the $n$-th power, and $p_\lambda$ for any partition $\lambda$ is again obtained multiplicatively.
+        \item Last but not least, the Schur function of a partition $\lambda$ is obtained by enumeration over all \emph{semi-standard fillings} of the ferrers diagram of $\lambda$. 
+        \item  these fillings are positive integers in each of the squares of the diagram, weakly increasing in rows and strictly increasing in columns.
+        \item the monomial associated to the filling is obtained by setting the exponent of $x_i$ to be the number of $i$'s in the filling.
+        \item Note that, contrary to the previous basis, it is not immediately clear that schur functions are symmetric. There exists a nice combinatorial proof. 
+        \item These were the classical basis of $\Lambda_\KK$.
         \item If we take $\KK = \QQ(q,t)$ to be the smallest field containing to parameters $q$ and $t$ then the so-called \emph{Macdonald polynomials} are a remarkable basis of $\Lambda_\KK$. 
-        \item Not only do they generalise other important families of symmetric functions (indeed for suitable choices of $q$ and $t$ we recover Schur functions, Hall-Littlewood polynomials and others), they seem to also have connections to Hilbert Schemes, Affine Hecke algebras and statistical physics.
+        \item Not only do they generalise other important families of symmetric functions (for suitable choices of $q$ and $t$ we recover Schur functions, Hall-Littlewood polynomials and others), they seem to also have deep connections to the representation theory of the symmetric group, Hilbert Schemes, Affine Hecke algebras and statistical physics.
     \end{itemize}
 
     \section{Interesting symmetric functions}
@@ -36,27 +57,51 @@
         \item it gives a correspondence between 
         \item irreducible representations (Specht modules) and schur functions
         \item Since, by Maschke's theorem, any finite dimensional representation is decomposable into irreducibles, this gives a correspondence between any representation of the symmetric group and positive integer combinations of schur functions. 
-        \item If we now consider a bi-graded representation of the symmetric group and define a bi-graded version of the Frobenius characteristic map to keep track of the gradation as follows, \emph{then} bi-graded representations of the symmetric group correspond exactly to symmetric functions that can be written as a combination of schur functions with coefficients in the polynomial ring in the variables $q$ and $t$ and positive integer coefficients
+        \item 
+        We will in particular be interested in representations that are naturally bi-graded. In this case we may define a bi-graded version of the Frobenius characteristic map to keep track of the gradation by encoding them in the exponents of two variables, $q$ and $t$.
+        \item Then bi-graded representations of the symmetric group correspond exactly to symmetric functions whose schur decomposition coefficients are polynomials in $q$ and $t$ with positive integer coefficients.
         \item this is what we refer to as Schur positivity
+    \end{itemize}
+    
+    \section{Bi-graded representations}
+    \begin{itemize}
         \item let us discuss some examples of interesting, that is schur positive symmetric functions
         \item since their introduction in the 80's, a version of Macdonald polynomials have been conjectured to be schur positive
         \item in the 90's Garsia and Haiman proved Macdonald positivity by showing that they are the Frobenius image of their Garsia-Haiman modules. They first reduced their proof to showing that the dimension of their modules equals $n!$, which Haiman proved in 2001. 
-        \item In the process of proving Macdonald positivity, Garsia and Haiman introduced the space of diagonal coinvariants, a natural polynomial ring construction. 
-        \item Its Frobenius characteristic is $\nabla e_n$, where $\nabla$ is an diagonal operator on Macdonald polynomials. (This was conjectured by Garsia Bergeron and proved by Haiman)
-        \item Zabrocki introduced the space of \emph{super}diagonal coinvariants, and conjectured its Frobenius characteristic to be $\Delta'_{e_{n-k-1}}e_n$. 
-        \item This is the symmetric function of the \emph{Delta conjecture}.
+        \item In the process of proving Macdonald positivity, Garsia and Haiman introduced the space of diagonal coinvariants.
+    \end{itemize}
+    \subsection{Diagonal coinvariants}    
+    \begin{itemize}
+        \item The module of diagonal coinvariants is easily defined as follows:
+        \item consider the ring of polynomials with complex coefficients in two sets of $n$ variables
+        \item define a \emph{diagonal action} of $\mathfrak{S}_n$ on $R_n$ that permutes the the two sets of variables simultaneaously
+        \item then the module of coinvariants is the quotient of $R_n$ with the ideal of constant-free invariants of this action
+        \item note that this space in naturally bi-graded by $x,y$ degree. 
+        \item Its Frobenius characteristic is $\nabla e_n$, where $\nabla$ is an diagonal operator on Macdonald polynomials. (This was conjectured by Garsia Bergeron and proved by Haiman in 2002)
+        \item this is the symmetric function of the shuffle theorem, which we will discuss later
+    \end{itemize}
+    \subsection{super-diagonal coinvariants}
+    \begin{itemize}
+        \item Very recently, Zabrocki introduced the space of \emph{super}diagonal coinvariants. 
+        \item The idea is the same as for diagonal coinvariants, except that now, there are \emph{three} sets of variables, and the third set, the $\theta$'s are anti-commutative.
+        \item Again we define the diagonal action and quotient out the constant free invariants of the action. 
+        \item For any integer $k$, the space $\mathcal{SDC}_{n,k}$ is the degree $k$ component in the $\theta$-variables. Again, the bi-gradation comes from the $x,y$-degree.
+        \item Zabrocki conjectured that Frobenius characteristic of his module equals the symmetric function $\Delta'_{e_{n-k-1}}e_n$. 
         \item $\Delta$ and $\Delta'$ are also diagonal operators on Macdonald polynomials that generalise $\nabla$ in a sense. 
+        \item This is the symmetric function of the \emph{Delta conjecture}.
     \end{itemize}
 
     \section{Combinatorics of lattice paths}
+    
+    We can now use the combinatorics of lattice paths to explicitely construct positive symmetric functions
     \begin{itemize}
-        \item a square path of size $n$ starts at $(0,0)$, ends at $(n,n)$, employs only unit north and east steps and ends with an east steps. Here we show a path of size $8$.
+        \item a square path of size $n$ starts at $(0,0)$, ends at $(n,n)$, uses only unit north and east steps and ends with an east step. Here we show a path of size $8$.
         \item A Dyck path is a square path that stays above the line $x=y$. 
         \item Since all Dyck paths are also square paths, I will give all the definitions on the larger set of square paths.
         \item the $0$'s are qualitatively different from the other labels.
         \item As for SSYT, the monomial of the path encodes the filling/labelling of it.
         \item in this definition, we set $x_0\mapsto 1$, so  it's as if the $0$'s are not present, hence \emph{partially labelled}.
-        \item A \emph{contractible valley} is a vertical step preceded by another vertical step, which, if we were to delete it, would still yield a valid Dyck paths. In other words a contractible valley may not be preceded directly by a smaller label on the same diagonal.
+        \item A \emph{contractible valley} is a vertical step preceded by another vertical step, which, if we were to delete it, would still yield a valid labelled path. In other words a contractible valley may not be preceded directly by a smaller label on the same diagonal.
     \end{itemize}
 
 \section{Combinatorial formulas}
@@ -74,7 +119,7 @@
     \item The Delta conjecture was made by Haglund Remmel and Wilson in 2015
     \item it is an interpretation of $\Delta'_{e_{n-k-1}}e_n$ in terms of Dyck paths of size $n$ with $k$ decorations
     \item We present here the \emph{valley version} of the Delta conjecture, which is still an open problem. 
-    \item The also exists a version where the decorations are on \emph{rises} instead of valleys. This version was proved very recently by D'Adderio and Mellit. 
+    \item There also exists a version where the decorations are on \emph{rises} instead of valleys. This version was proved very recently by D'Adderio and Mellit. 
     \item This proof made use of the novel Theta operators, introduced by Iraci, D'Adderio and myself. 
     \item We can rewrite the Delta conjecture symmetric function using Theta: we get $\Theta_k \nabla e_{n-k}$
     \item Comparing with the Shuffle theorem symmetric function, it seems that applying $\Theta_k$ has the effect of adding $k$ decorated steps to the combinatorics.
@@ -110,7 +155,18 @@
             \item Start out with the set of paths for the Delta conjecture: i.e.\ labelled decorated Dyck paths. 
             \item We describe an algorithm to go from this set to the set of \emph{partially} labelled Dyck paths. In other words, we add $0$ labels.  
             \item The algorithm will allow us to keep track of the changes in statistics and labelling.
-            \item Combined with a fancy identity reflecting the same behavior on the symmetric function side, this will yield a proof a the implication. 
+            \item Combined with a fancy identity reflecting the same behavior on the symmetric function side, this will yield a proof a the implication.
+            \item The algorithm is as follows:
+            \item select the maximal labels of the path (for those who are familiar, this corresponds to applying $h_j^\perp$ on the symmetric function side)
+            \item for the labels strictly above the line $x=y$, wether they are decorated or not, we push them in as \emph{such} and replace the maximal label by a zero
+            \item since the $4$'s were above the line $x=y$, the resulting path is still a dyck path, and since $0$ is smaller than any of the labels, the labelling remains valid. 
+            \item The area changes by however many labels we pushed in
+            \item the dinv stays constant because any primary dinv pair involving the pushed in labels becomes a secondary dinv pair and vice versa. Indeed, the label goes down one diagonal, instead of being bigger than all labels, it is now smaller.
+            \item the maximal labels on the line $x=y$ must be followed by a horizontal step since there cannot be a bigger label on top. We delete the label, vertical and horizontal step, and the possible decoration. 
+            \item the area remains constant
+            \item the change to the dinv is predictable and depends only on the interlacing between the deleted labels and the others on the line $x=y$.  
+            \item With this algorithm we can obtain any partially labelled Dyck path.
+            \item Combined with a symmetric function identity, this proves that Delta implies generalised Delta. 
         \end{itemize}
 
     \subsection{Delta $\Rightarrow$ Delta square}
@@ -119,13 +175,19 @@
             \item build from scratch the set of square paths with a fixed set of labels in the diagonals
             \item during this process we keep track of the dinv (notice that for fixed labels in diagonals the area and monomial are constant)
             \item this allows us to get a factorization of the $q,t,x$ enumeration of the set, sometimes called a \emph{schedule formula}
-            \item this formula, combined with some classical symmetric function identities, allows us to \emph{shift} all the labels one diagonal up
-            \item thus we are able to go from square paths to Dyck paths.
+            \item this factorisation, combined with some classical symmetric function identities, allows us to \emph{shift} all the labels one diagonal up
+            \item so we are able to go from square paths to Dyck paths.
             \item So the last thing I will show you all today is how to construct the set of paths with these labels in the diagonals.
+            \item I'll show you now how to generate all the decorated square paths with a fixed diagonal word. 
             \item We start from the empty path and then add the biggest label, 3 into the diagonal containing the line $x=y$, which we will call the $0$-diagonal. 
             \item Then we add the smaller labels, two 2's into the same diagonal.
             \item there are three ways to do this, each creating a different amount of dinv
             \item  the dinv contributions will generally be counted by $q$-binomials, (for those who are familiar with them)
         \end{itemize}
+    
+    \section{Conclusion}
+    So these were the main combinatorial ideas for our proofs, which makes the generalised Delta (square) conjecture conditional only upon the Delta conjecture.
+
+    Thank you very much for your attention. 
 
 \end{document}
